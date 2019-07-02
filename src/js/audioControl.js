@@ -27,6 +27,9 @@
         }
 
     };
+    AudioManager.prototype.playTo = function (t) {
+            this.audio.currentTime = t;
+    };
     root.audioManager = AudioManager;
 
 })(window.Zepto, window.player || (window.player = {}))

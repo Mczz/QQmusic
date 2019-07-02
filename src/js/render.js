@@ -24,11 +24,12 @@
             $('.control .like').removeClass('liking');
         }
     }
+   
     function render(data){
-
         renderImg(data.image);
         renderInfo(data);
         renderIsLike(data.isLike);
     }
+    
     root.render = render;
 })(window.Zepto,window.player || (window.player = {}));

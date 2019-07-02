@@ -13,10 +13,13 @@ var cb = {
                 'transform':`rotateZ(${self.deg}deg)`,
                 'transition':'all 0.2s ease-in'
             });
-        },100)
-    },
+        },100);
+        player.pro.start();
+        
+12    },
     pauseCB(){
         clearInterval(this.tiemr);
+        player.pro.stop();
     }
 }
 var audio = new player.audioManager(cb);
@@ -31,6 +34,7 @@ function getData(url) {
             controlI = new player.controlIndex(dataList.length);
             playChange(0);
             bindEvent();
+            bindTouch();
         },
         error: function () {
             console.log("error");
@@ -39,12 +43,14 @@ function getData(url) {
 };
 
 function playChange(index) {
+    //恢复圆盘位置
     cb.deg = 0;
     $('.imgbox').css({
         'transform':`rotateZ(${cb.deg}deg)`,
         'transition':'none'
     });
     player.render(dataList[index]);
+    player.pro.renderTime(dataList[index].duration);
     audio.getAudio(dataList[index].audio);
 };
 
@@ -65,5 +71,37 @@ function bindEvent() {
         }
         $('.play').toggleClass('playing');
     });
+    audio.audio.onended = function(){
+        var i = controlI.next();
+        playChange(i);
+    }
 };
+function bindTouch(){
+    var $spot = $('.pro-slider');
+    var bottom = $('.pro-outer').offset();
+    var l = bottom.left;
+    var w = bottom.width;
+    $spot.on('touchstart',function(){
+        audio.pause();
+    });
+    $spot.on('touchmove',function(e){
+        var x = e.changedTouches[0].clientX;
+        var per = (x - l) / w;
+        if(per >= 0 && per <= 1){
+            player.pro.updatePro(per);
+        }
+    });
+    $spot.on('touchend',function(e){
+        var x = e.changedTouches[0].clientX;
+        var per = (x - l) / w;
+        if(per >= 0 && per <= 1){
+            var time = per * dataList[controlI.index].duration;
+            player.pro.start(per);
+            audio.play();
+            audio.playTo(time);
+        }else if(audio.audio.readyState){
+            audio.play();
+        }
+    });
+}
 getData("../mock/data.json");
